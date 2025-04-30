@@ -4,7 +4,7 @@
   "description": "Nothing",
   "main": "index.js",
   "scripts": {
-    "testforms": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/forms.spec.ts",
+    "test:alerts": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/alerts.frame.windows.spec.ts",
     "test:united": "wdio wdio.conf/wdio.united.conf.ts",
     "test:firefox": "wdio wdio.conf/wdio.firefox.conf.ts",
     "test:chromium": "wdio wdio.conf/wdio.chromium.conf.ts",

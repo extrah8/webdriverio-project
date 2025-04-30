@@ -8,20 +8,15 @@ describe('DemoQA Elements Section', () => {
         await homePage.open();
         await homePage.clickCard(CardName.elements);
         await homePage.selectElementMenuItem(ElementsMenuItem.checkBox);
-
         await elementsPage.expandAll();
         expect(await elementsPage.desktopNode.isDisplayed()).true;
-
         await elementsPage.collapseAll();
         expect(await elementsPage.desktopNode.isDisplayed()).false;
-
         await elementsPage.expandNode('Home');
         await elementsPage.expandNode('Desktop');
         await elementsPage.clickCheckbox('Commands');
-
         const isChecked = await elementsPage.isCheckboxChecked('Commands');
         expect(isChecked).true;
-
         const resultText = await elementsPage.getResultText();
         expect(resultText).to.contain('commands');
     });
@@ -30,7 +25,6 @@ describe('DemoQA Elements Section', () => {
         await homePage.open();
         await homePage.clickCard(CardName.elements);
         await homePage.selectElementMenuItem(ElementsMenuItem.textBox);
-
         await elementsPage.verifyFormElementsVisible();
         await elementsPage.fillForm(
             'John Doe',
@@ -45,17 +39,13 @@ describe('DemoQA Elements Section', () => {
         await homePage.open();
         await homePage.clickCard(CardName.elements);
         await homePage.selectElementMenuItem(ElementsMenuItem.uploadDownload);
-
         const filePath = path.resolve('./fixtures/test_txt.txt');
         await elementsPage.uploadFile(filePath);
-
         const uploadedFilePath = await elementsPage.getUploadedFilePath();
         expect(uploadedFilePath).to.contain('test_txt.txt');
-
         const downloadedFilePath = await elementsPage.downloadFile('sampleFile.jpeg');
         const isDownloadedFileExists = await elementsPage.isFileExists(downloadedFilePath);
         expect(isDownloadedFileExists).true;
-
         await elementsPage.deleteFile(downloadedFilePath);
     });
 
@@ -63,15 +53,12 @@ describe('DemoQA Elements Section', () => {
         await homePage.open();
         await homePage.clickCard(CardName.elements);
         await homePage.selectElementMenuItem(ElementsMenuItem.radioButton);
-
         expect(await elementsPage.isRadioEnabled(elementsPage.yesRadio)).true;
         await elementsPage.clickLabelForRadio('yesRadio');
         expect(await elementsPage.getRadioResultText()).to.contain('Yes');
-
         expect(await elementsPage.isRadioEnabled(elementsPage.impressiveRadio)).true;
         await elementsPage.clickLabelForRadio('impressiveRadio');
         expect(await elementsPage.getRadioResultText()).to.contain('Impressive');
-
         expect(await elementsPage.isRadioEnabled(elementsPage.noRadio)).false;
     });
 
@@ -79,10 +66,8 @@ describe('DemoQA Elements Section', () => {
         await homePage.open();
         await homePage.clickCard(CardName.elements);
         await homePage.selectElementMenuItem(ElementsMenuItem.webTables);
-
         await elementsPage.verifyColumnHeaders();
         await elementsPage.changeRowsPerPage('50');
-
         await elementsPage.addNewRecord(
             'TestName',
             'TestLastName',
@@ -91,11 +76,9 @@ describe('DemoQA Elements Section', () => {
             '5000',
             'QA'
         );
-
         await elementsPage.searchRecord('TestName');
         const searchResult = await elementsPage.getTableText();
         expect(searchResult).to.contain('TestName');
-
         await elementsPage.editRecord(
             'TestName',
             'EditedName',
@@ -105,11 +88,9 @@ describe('DemoQA Elements Section', () => {
             '6000',
             'Dev'
         );
-
         await elementsPage.searchRecord('EditedName');
         const editedResult = await elementsPage.getTableText();
         expect(editedResult).to.contain('EditedName');
-
         await elementsPage.deleteRecordByName('EditedName');
         await elementsPage.searchRecord('EditedName');
         const deletedResult = await elementsPage.getTableText();

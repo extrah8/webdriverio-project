@@ -71,6 +71,7 @@ export class FormsPage extends Page {
         await this.stateDropDown.scrollIntoView();
         await this.stateDropDown.click();
         const stateOption = await $(`//div[contains(@id,'react-select-3-option') and text()='${state}']`);
+        await stateOption.waitForExist({ timeout: 5000 });
         await stateOption.waitForClickable({ timeout: 5000 });
         await stateOption.click();
     }
@@ -79,6 +80,7 @@ export class FormsPage extends Page {
         await this.cityDropDown.scrollIntoView();
         await this.cityDropDown.click();
         const cityOption = await $(`//div[contains(@id,'react-select-4-option') and text()='${city}']`);
+        await cityOption.waitForExist({ timeout: 5000 });
         await cityOption.waitForClickable({ timeout: 5000 });
         await cityOption.click();
     }
@@ -89,7 +91,7 @@ export class FormsPage extends Page {
         await this.submitButton.click();
     }
 
-public async selectDateOfBirth(date: string): Promise<void> {
+    public async selectDateOfBirth(date: string): Promise<void> {
     await this.inputDateOfBirth.click();
 
     const [day, month, year] = date.split(' ');
@@ -169,7 +171,7 @@ public async selectDateOfBirth(date: string): Promise<void> {
     expect(await this.stateDropDown.getText()).to.equal('Select State');
     expect(await this.cityDropDown.getText()).to.equal('Select City');
     }
-public async waitForFieldToBeInvalid(element: WebdriverIO.Element, timeout = 2000): Promise<void> {
+  public async waitForFieldToBeInvalid(element: WebdriverIO.Element, timeout = 2000): Promise<void> {
   await browser.waitUntil(
     async () => {
       const borderColor = await element.getCSSProperty('border-color');
@@ -177,7 +179,7 @@ public async waitForFieldToBeInvalid(element: WebdriverIO.Element, timeout = 200
     },
     {
       timeout,
-      timeoutMsg: '❌ Border color did not become #dc3545 within expected time'
+      timeoutMsg: 'Border color did not become #dc3545 within expected time'
     }
   );
 }

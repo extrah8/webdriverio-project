@@ -24,6 +24,13 @@ export enum ElementsMenuItem {
 export enum FormsMenuItem {
     practiceForm = 'Practice Form'
 }
+export enum AlertsFrameWindowsMenuItem {
+    browserWindows = 'Browser Windows',
+    alerts = 'Alerts',
+    frames = 'Frames',
+    nestedFrames = 'Nested Frames',
+    modalDialogs = 'Modal Dialogs'
+}
 
 export class HomePage extends Page {
     public get allCards() {
@@ -69,6 +76,15 @@ export class HomePage extends Page {
         const element = await $(`//ul[@class="menu-list"]//span[text()="${item}"]`);
         await element.scrollIntoView();
         await element.click();
+    }
+    /**
+     * Select an item from the Forms section using enum
+     * @param item Menu item from AlertsFrameWindowsMenuItem enum
+     */
+    public async selectAlertsMenuItem(item: AlertsFrameWindowsMenuItem): Promise<void> {
+    const element = await $(`//ul[@class="menu-list"]//span[text()="${item}"]`);
+    await element.scrollIntoView();
+    await element.click();
     }
 }
 
