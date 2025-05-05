@@ -70,22 +70,19 @@ export const config: WebdriverIO.Config = {
 
 afterTest: async function (test, context, { error, result, duration, passed, retries }) {
     try {
-        if (browser && browser.sessionId) {
+        if (browser && await browser.getSession()) {
             if (!passed) {
                 const screenshot = await browser.takeScreenshot();
                 addAttachment('Screenshot on Failure', Buffer.from(screenshot, 'base64'), 'image/png');
             }
-
             const pageSource = await browser.getPageSource();
             addAttachment('Page Source', pageSource, 'text/html');
-
             try {
                 const logs = await browser.getLogs('browser');
                 addAttachment('Browser Console Logs', JSON.stringify(logs, null, 2), 'application/json');
             } catch (err) {
                 console.warn('Could not fetch browser logs:', err);
             }
-
             const videoPath = path.join('./video', `${browser.sessionId}.mp4`);
             if (fs.existsSync(videoPath)) {
                 const video = fs.readFileSync(videoPath);
@@ -95,5 +92,5 @@ afterTest: async function (test, context, { error, result, duration, passed, ret
     } catch (err) {
         console.warn('afterTest hook failed:', err);
     }
-}
+},
 };

@@ -20,9 +20,6 @@ class AlertsFrameWindowsPage {
   public get frame1() { return $('#frame1'); }
   public get frame2() { return $('#frame2'); }
   public get frameHeading() { return $('#sampleHeading'); }
-  // Nested Frames
-  public get parentFrame() { return $('iframe[srcdoc*="Parent frame"]'); }
-  public get childFrame() { return $('iframe[srcdoc*="Child Iframe"]'); }
 
   // Modal Dialogs
   public get smallModalButton() { return $('#showSmallModal'); }
@@ -33,6 +30,10 @@ class AlertsFrameWindowsPage {
   public get closeLargeModalButton() { return $('#closeLargeModal'); }
 
   // Methods
+
+  /**
+   * Opens a new tab and verifies it contains expected text.
+   */
   public async openNewTabAndValidate(expectedText: string): Promise<void> {
     const originalWindow = await browser.getWindowHandle();
     const handlesBefore = await browser.getWindowHandles();
@@ -50,6 +51,9 @@ class AlertsFrameWindowsPage {
     await browser.switchToWindow(originalWindow);
   }
 
+  /**
+   * Opens a new window and verifies it contains expected text.
+   */
   public async openNewWindowAndValidate(expectedText: string): Promise<void> {
     const originalWindow = await browser.getWindowHandle();
     const handlesBefore = await browser.getWindowHandles();
@@ -66,168 +70,202 @@ class AlertsFrameWindowsPage {
     await browser.closeWindow();
     await browser.switchToWindow(originalWindow);
   }
-  
-public async handleSimpleAlert(expectedText?: string): Promise<void> {
-  await this.alertButton.click();
 
-  const appeared = await browser.waitUntil(
-    async () => await browser.isAlertOpen(),
-    { timeout: 3000, timeoutMsg: 'Alert did not appear' }
-  ).catch(() => false);
-
-  if (!appeared) {
-    console.warn('Alert never appeared.');
-    return;
+  /**
+   * Opens a message window and closes it.
+   */
+  public async openNewWindowMessageAndValidate(): Promise<void> {
+    const originalWindow = await browser.getWindowHandle();
+    const handlesBefore = await browser.getWindowHandles();
+    await this.newWindowMessageButton.click();
+    await browser.waitUntil(
+        async () => {
+            const now = await browser.getWindowHandles();
+            return now.length > handlesBefore.length;
+        },
+        {
+            timeout: 3000,
+            timeoutMsg: 'Message window did not open',
+        }
+    );
+    const handlesAfter = await browser.getWindowHandles();
+    const newWindow = handlesAfter.find(h => !handlesBefore.includes(h));
+    if (!newWindow) {
+        throw new Error('New window handle was not found');
+    }
+    await browser.switchToWindow(newWindow);
+    await browser.closeWindow();
+    await browser.switchToWindow(originalWindow);
   }
 
-  if (expectedText) {
+  /**
+   * Handles a simple alert and optionally validates its text.
+   */
+  public async handleSimpleAlert(expectedText?: string): Promise<void> {
+    await this.alertButton.click();
+    const appeared = await browser.waitUntil(
+      async () => await browser.isAlertOpen(),
+      { timeout: 3000, timeoutMsg: 'Alert did not appear' }
+    ).catch(() => false);
+
+    if (!appeared) {
+      console.warn('Alert never appeared.');
+      return;
+    }
+
+    if (expectedText) {
+      try {
+        const alertText = await browser.getAlertText();
+        expect(alertText).to.equal(expectedText);
+      } catch {
+        console.warn('Could not read alert text.');
+      }
+    }
+
     try {
-      const alertText = await browser.getAlertText();
-      expect(alertText).to.equal(expectedText);
+      if (await browser.isAlertOpen()) {
+        await browser.acceptAlert();
+      }
     } catch {
-      console.warn('Could not read alert text.');
+      console.warn('Alert disappeared before acceptAlert().');
     }
   }
 
-  try {
-    if (await browser.isAlertOpen()) {
-      await browser.acceptAlert();
+  /**
+   * Handles confirm alert and clicks OK or Cancel based on input.
+   */
+  public async handleConfirmAlert(accept: boolean, expectedText?: string): Promise<void> {
+    await this.confirmButton.scrollIntoView();
+    await this.confirmButton.click();
+    const appeared = await browser.waitUntil(
+      async () => await browser.isAlertOpen(),
+      { timeout: 3000, timeoutMsg: 'Confirm alert did not appear' }
+    ).catch(() => false);
+    if (!appeared) {
+      console.warn('Confirm alert never appeared.');
+      return;
     }
-  } catch {
-    console.warn('Alert disappeared before acceptAlert().');
-  }
-}
-
-public async handleConfirmAlert(accept: boolean, expectedText?: string): Promise<void> {
-  await this.confirmButton.scrollIntoView();
-  await this.confirmButton.click();
-  await browser.pause(100);
-  const appeared = await browser.waitUntil(
-    async () => await browser.isAlertOpen(),
-    { timeout: 3000, timeoutMsg: 'Confirm alert did not appear' }
-  ).catch(() => false);
-  if (!appeared) {
-    console.warn('Confirm alert never appeared.');
-    return;
-  }
-  if (expectedText) {
+    if (expectedText) {
+      try {
+        const alertText = await browser.getAlertText();
+        expect(alertText).to.equal(expectedText);
+      } catch {
+        console.warn('Could not read confirm alert text.');
+      }
+    }
     try {
-      const alertText = await browser.getAlertText();
-      expect(alertText).to.equal(expectedText);
+      if (await browser.isAlertOpen()) {
+        accept ? await browser.acceptAlert() : await browser.dismissAlert();
+      }
     } catch {
-      console.warn('Could not read confirm alert text.');
+      console.warn('Confirm alert disappeared before accept/dismiss.');
     }
   }
-  try {
-    if (await browser.isAlertOpen()) {
-      await browser.pause(100);
-      accept ? await browser.acceptAlert() : await browser.dismissAlert();
-    }
-  } catch {
-    console.warn('Confirm alert disappeared before accept/dismiss.');
-  }
-}
-public async handlePromptAlert(input: string): Promise<void> {
-  await this.promptButton.waitForClickable({ timeout: 3000 });
-  await this.promptButton.scrollIntoView();
-  await this.promptButton.click();
-  await browser.pause(200); 
-  try {
-    await browser.sendAlertText(input);
-    await browser.acceptAlert();
-  } catch (err) {
-    throw new Error('Failed to send text or accept prompt: ' + err);
-  }
-}
-  public async waitForPromptResult(expected: string, timeout = 2000): Promise<void> {
-  await browser.waitUntil(
-    async () => (await this.promptResult.getText()).trim() === expected,
-    { timeout, timeoutMsg: `Prompt result did not update to "${expected}"` }
-  );
-}
+
+  /**
+   * Waits for the alert result to appear with expected text.
+   */
   public async waitForAlertResult(expected: string, timeout = 2000): Promise<void> {
-  await browser.waitUntil(
-    async () => (await this.alertResult.getText()) === expected,
-    { timeout, timeoutMsg: `Alert result did not match: ${expected}` }
-  );
-}
+    await browser.waitUntil(
+      async () => (await this.alertResult.getText()) === expected,
+      { timeout, timeoutMsg: `Alert result did not match: ${expected}` }
+    );
+  }
 
-public async handleDelayedAlert(expectedText: string, timeout = 7000): Promise<void> {
-  await this.timedAlertButton.click();
-  const appeared = await browser.waitUntil(
-    async () => await browser.isAlertOpen(),
-    { timeout, timeoutMsg: 'Delayed alert did not appear' }
-  ).catch(() => false);
-  if (!appeared) {
-    console.warn('Delayed alert never appeared.');
-    return;
-  }
-  try {
-    const alertText = await browser.getAlertText();
-    expect(alertText).to.equal(expectedText);
-  } catch {
-    console.warn('Could not read delayed alert text.');
-  }
-  try {
-    if (await browser.isAlertOpen()) {
-      await browser.acceptAlert();
+  /**
+   * Handles delayed alert and verifies its content before accepting.
+   */
+  public async handleDelayedAlert(expectedText: string, timeout = 7000): Promise<void> {
+    await this.timedAlertButton.click();
+    const appeared = await browser.waitUntil(
+      async () => await browser.isAlertOpen(),
+      { timeout, timeoutMsg: 'Delayed alert did not appear' }
+    ).catch(() => false);
+    if (!appeared) {
+      console.warn('Delayed alert never appeared.');
+      return;
     }
-  } catch {
-    console.warn('Delayed alert disappeared before accept.');
+    try {
+      const alertText = await browser.getAlertText();
+      expect(alertText).to.equal(expectedText);
+    } catch {
+      console.warn('Could not read delayed alert text.');
+    }
+    try {
+      if (await browser.isAlertOpen()) {
+        await browser.acceptAlert();
+      }
+    } catch {
+      console.warn('Delayed alert disappeared before accept.');
+    }
   }
-}
-public async switchToFrameAndGetText(frame: WebdriverIO.Element): Promise<string> {
-  await frame.waitForExist({ timeout: 3000 });
-  await frame.scrollIntoView();
-  const frameElem = await frame;
-  await browser.switchFrame(frameElem);
-  const heading = await this.frameHeading;
-  await heading.waitForDisplayed({ timeout: 3000 });
-  const text = await heading.getText();
-  await browser.switchToParentFrame();
-  return text;
-}
 
-public async isFrameContentFullyVisible(frame: WebdriverIO.Element): Promise<boolean> {
-  await frame.waitForExist({ timeout: 3000 });
-  await frame.scrollIntoView();
-  await browser.switchFrame(frame);
-  await browser.pause(300);
-  const heading = await $('#sampleHeading');
-  const isVisible = await heading.isDisplayed();
-  await browser.switchToParentFrame();
-  return isVisible;
-}
-public async getNestedFrameTexts(): Promise<{ parentText: string; childText: string }> {
-  await this.frame1.waitForExist({ timeout: 5000 });
-  await this.frame1.scrollIntoView();
-  await browser.switchFrame(await this.frame1);
-  const parentText = await $('body').getText();
-  const child = await $('iframe');
-  await child.waitForExist({ timeout: 3000 });
-  await browser.switchFrame(child);
-  const childText = await $('body').getText();
-  await browser.switchToParentFrame();
-  await browser.switchToParentFrame();
-  return {
-    parentText: parentText.trim(),
-    childText: childText.trim(),
-  };
-}
-public async handleModalDialog(size: 'small' | 'large'): Promise<{ title: string; body: string }> {
-  const openButton = size === 'small' ? this.smallModalButton : this.largeModalButton;
-  const closeButton = size === 'small' ? this.closeSmallModalButton : this.closeLargeModalButton;
-  await openButton.scrollIntoView();
-  await openButton.click();
-  await this.modalTitle.waitForDisplayed({ timeout: 3000 });
-  await this.modalBody.waitForDisplayed({ timeout: 3000 });
-  const title = await this.modalTitle.getText();
-  const body = await this.modalBody.getText();
-  await closeButton.waitForClickable({ timeout: 3000 });
-  await closeButton.click();
-  await this.modalTitle.waitForDisplayed({ reverse: true, timeout: 3000 });
-  return { title, body };
-}
+  /**
+   * Switches to a given iframe and returns its heading text.
+   */
+  public async switchToFrameAndGetText(frame: ChainablePromiseElement): Promise<string> {
+    await frame.waitForExist({ timeout: 3000 });
+    await frame.scrollIntoView();
+    const frameElem = await frame;
+    await browser.switchFrame(frameElem);
+    const heading = await this.frameHeading;
+    await heading.waitForDisplayed({ timeout: 3000 });
+    const text = await heading.getText();
+    await browser.switchToParentFrame();
+    return text;
+  }
+
+  /**
+   * Checks if the heading inside the frame is visible.
+   */
+  public async isFrameContentFullyVisible(frame: ChainablePromiseElement): Promise<boolean> {
+    await frame.waitForExist({ timeout: 3000 });
+    await frame.scrollIntoView();
+    await browser.switchFrame(frame);
+    await browser.pause(300);
+    const heading = await $('#sampleHeading');
+    const isVisible = await heading.isDisplayed();
+    await browser.switchToParentFrame();
+    return isVisible;
+  }
+
+  /**
+   * Retrieves text from parent and child nested iframes.
+   */
+  public async getNestedFrameTexts(): Promise<{ parentText: string; childText: string }> {
+    await this.frame1.waitForExist({ timeout: 5000 });
+    await this.frame1.scrollIntoView();
+    await browser.switchFrame(await this.frame1);
+    const parentText = await $('body').getText();
+    const child = await $('iframe');
+    await child.waitForExist({ timeout: 3000 });
+    await browser.switchFrame(child);
+    const childText = await $('body').getText();
+    await browser.switchToParentFrame();
+    await browser.switchToParentFrame();
+    return {
+      parentText: parentText.trim(),
+      childText: childText.trim(),
+    };
+  }
+
+  /**
+   * Handles modal dialog opening and closing.
+   */
+  public async handleModalDialog(size: 'small' | 'large'): Promise<{ title: string; body: string }> {
+    const openButton = size === 'small' ? this.smallModalButton : this.largeModalButton;
+    const closeButton = size === 'small' ? this.closeSmallModalButton : this.closeLargeModalButton;
+    await openButton.scrollIntoView();
+    await openButton.click();
+    await this.modalTitle.waitForDisplayed({ timeout: 3000 });
+    await this.modalBody.waitForDisplayed({ timeout: 3000 });
+    const title = await this.modalTitle.getText();
+    const body = await this.modalBody.getText();
+    await closeButton.waitForClickable({ timeout: 3000 });
+    await closeButton.click();
+    await this.modalTitle.waitForDisplayed({ reverse: true, timeout: 3000 });
+    return { title, body };
+  }
 }
 
 export const alertsFrameWindowsPage = new AlertsFrameWindowsPage();

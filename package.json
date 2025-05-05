@@ -4,6 +4,10 @@
   "description": "Nothing",
   "main": "index.js",
   "scripts": {
+    "test:interactions": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/interactions.spec.ts",
+    "test:forms": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/forms.spec.ts",
+    "test:widgets": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/widgets.spec.ts",
+    "test:elements": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/elements.spec.ts",
     "test:alerts": "wdio wdio.conf/wdio.chromium.conf.ts --spec ./test/specs/desktop/alerts.frame.windows.spec.ts",
     "test:united": "wdio wdio.conf/wdio.united.conf.ts",
     "test:firefox": "wdio wdio.conf/wdio.firefox.conf.ts",

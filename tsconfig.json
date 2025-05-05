@@ -4,7 +4,7 @@
     "module": "commonjs",
     "strict": true,
     "baseUrl": "./",
-    "types": ["node", "webdriverio/async", "@wdio/mocha-framework", "expect-webdriverio", "@wdio/visual-service", "@wdio/globals"],
+    "types": ["node","mocha", "@wdio/globals/types", "@wdio/mocha-framework", "expect-webdriverio"],
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
