@@ -65,18 +65,25 @@ describe('DemoQA Widgets Section', () => {
     expect(currentValue).to.equal(targetValue);
   });
 
-  it('Progress Bar - should reach target value and reset', async () => {
+  it('Progress Bar - should pause, complete to 100%, and reset to 0', async () => {
     await homePage.open();
     await homePage.clickCard(CardName.widgets);
     await homePage.selectWidgetsMenuItem(WidgetsMenuItem.progressBar);
 
     await widgetsPage.startProgressBar();
-    await widgetsPage.waitForProgressToReach(75);
+    await widgetsPage.waitForProgressToReach(40);
+    await widgetsPage.startProgressBar();
 
-    const value = await widgetsPage.getProgressBarValue();
-    expect(value).to.be.at.least(75);
+    const pausedValue = await widgetsPage.getProgressBarValue();
+    expect(pausedValue).to.be.at.least(40);
+
+    await widgetsPage.startProgressBar();
+    await widgetsPage.waitForProgressToReach(100);
+    await browser.pause(2000);
 
     await widgetsPage.resetProgressBar();
+    await browser.pause(2000);
+
     const resetValue = await widgetsPage.getProgressBarValue();
     expect(resetValue).to.equal(0);
   });

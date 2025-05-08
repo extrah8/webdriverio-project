@@ -1,4 +1,5 @@
 import Page from './page';
+import type { ChainablePromiseElement } from 'webdriverio';
 import { expect } from '@wdio/globals';
 import path from 'path';
 import fs from 'fs-extra';
@@ -192,9 +193,10 @@ export class ElementsPage extends Page {
     }
   }
 
+
   /** Checks if a specific radio button is enabled. */
-  public async isRadioEnabled(radio: WebdriverIO.Element): Promise<boolean> {
-    return await radio.isEnabled();
+  public async isRadioEnabled(radio: ChainablePromiseElement): Promise<boolean> {
+    return radio.isEnabled();
   }
 
   /** Clicks a radio button by its label 'for' attribute. */

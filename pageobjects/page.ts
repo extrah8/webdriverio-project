@@ -163,16 +163,9 @@ export default class Page {
         }
     }
     public getElement(element: string | WebdriverIO.Element): Promise<WebdriverIO.Element> {
-        return $(element);
+      return $(element);
     }
     public async isElementDisplayed(element: string | WebdriverIO.Element): Promise<boolean> {
-    return (await this.getElement(element)).isDisplayed();
+      return (await this.getElement(element)).isDisplayed();
   }
-    public async waitUntilElementDisplayed(element: string | WebdriverIO.Element): Promise<void> {
-        await browser.waitUntil(() => this.isElementDisplayed(element));
-    }
-
-    public async waitUntilElementNotDisplayed(element: string | WebdriverIO.Element): Promise<void> {
-        await browser.waitUntil(async () => !(await this.isElementDisplayed(element)));
-    }
 }

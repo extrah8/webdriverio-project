@@ -233,11 +233,15 @@ export class WidgetsPage extends Page {
 
   /**
    * Gets the current value of the progress bar.
+   * Returns 0 if progress is reset and no text is present.
    */
   public async getProgressBarValue(): Promise<number> {
     const progressText = await this.progressBarFill.getText();
+    if (!progressText || !progressText.includes('%')) return 0;
     return parseInt(progressText.replace('%', ''), 10);
   }
+
+
 }
 
 export const widgetsPage = new WidgetsPage();

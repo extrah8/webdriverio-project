@@ -1,5 +1,6 @@
 import Page from './page';
 import { expect } from 'chai';
+import type { ChainablePromiseElement } from 'webdriverio';
 
 export class FormsPage extends Page {
   // Inputs
@@ -37,29 +38,16 @@ export class FormsPage extends Page {
   }
 
   /**
-   * Selects a gender radio button.
+   * Selects a gender radio button by clicking on its label.
    */
   public async selectGender(gender: 'Male' | 'Female' | 'Other'): Promise<void> {
-    const genderLower = gender.toLowerCase();
-    let genderElement: WebdriverIO.Element;
+    const index = gender === 'Male' ? 1 : gender === 'Female' ? 2 : 3;
+    const label = $(`label[for="gender-radio-${index}"]`);
 
-    switch (genderLower) {
-      case 'male':
-        genderElement = await $('label[for="gender-radio-1"]');
-        break;
-      case 'female':
-        genderElement = await $('label[for="gender-radio-2"]');
-        break;
-      case 'other':
-        genderElement = await $('label[for="gender-radio-3"]');
-        break;
-      default:
-        throw new Error(`Invalid gender provided: ${gender}`);
-    }
-
-    await genderElement.scrollIntoView();
-    await genderElement.click();
-  }
+    await label.waitForDisplayed({ timeout: 3000 });
+    await label.scrollIntoView({ block: 'center' });
+    await label.click();
+}
 
   /**
    * Selects a state from the dropdown.
@@ -198,10 +186,14 @@ export class FormsPage extends Page {
     expect(await this.inputSubjects.getValue()).to.equal('');
   }
 
+
   /**
    * Waits until the given field is marked invalid (border turns red).
    */
-  public async waitForFieldToBeInvalid(element: WebdriverIO.Element, timeout = 2000): Promise<void> {
+  public async waitForFieldToBeInvalid(
+    element: ChainablePromiseElement,
+    timeout = 2000
+  ): Promise<void> {
     await browser.waitUntil(
       async () => {
         const borderColor = await element.getCSSProperty('border-color');
@@ -209,10 +201,11 @@ export class FormsPage extends Page {
       },
       {
         timeout,
-        timeoutMsg: 'Border color did not become #dc3545 within expected time'
+        timeoutMsg: 'Border color did not become #dc3545 within expected time',
       }
     );
   }
+  
 }
 
 export const formsPage = new FormsPage();

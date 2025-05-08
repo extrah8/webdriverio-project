@@ -7,7 +7,7 @@ export const config: WebdriverIO.Config = {
     specs: ['../test/specs/desktop/**/*.ts'],
     
     capabilities: [{
-        maxInstances: 5,
+        maxInstances: 3,
         browserName: 'chrome',
         'wdio:enforceWebDriverClassic': true,
         'goog:chromeOptions': {

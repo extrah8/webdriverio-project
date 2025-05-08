@@ -9,10 +9,10 @@ export const config: WebdriverIO.Config = {
   specs: [],
   exclude: [],
 
-  maxInstances: 10,
+  maxInstances: 3,
   capabilities: [
     {
-      maxInstances: 5,
+      maxInstances: 2,
       browserName: 'chrome',
       'goog:chromeOptions': {
         prefs: {

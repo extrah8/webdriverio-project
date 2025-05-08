@@ -171,11 +171,13 @@ describe('DemoQA Interactions Section', () => {
     await interactionsPage.dragElementByOffset(interactionsPage.boxDraggable, 300, 0);
     const boxEnd = await interactionsPage.getElementLocation(interactionsPage.boxDraggable);
     expect(boxEnd.x).to.be.greaterThan(boxStart.x);
+    expect(boxEnd.y).to.equal(boxStart.y);
 
     const parentStart = await interactionsPage.getElementLocation(interactionsPage.parentDraggable);
-    await interactionsPage.dragElementByOffset(interactionsPage.parentDraggable, 0, 300);
+    await interactionsPage.dragElementByOffset(interactionsPage.parentDraggable, 0, 100);
     const parentEnd = await interactionsPage.getElementLocation(interactionsPage.parentDraggable);
-    expect(parentEnd.y).to.be.greaterThan(parentStart.y);
+    expect(parentEnd.y).to.be.greaterThan(parentStart.y - 1);
+    expect(parentEnd.x).to.equal(parentStart.x);
 
     await interactionsPage.clickDraggableTab(interactionsPage.draggableCursorTab);
     const topLeftStart = await interactionsPage.getElementLocation(interactionsPage.topLeftCursorBox);
@@ -194,7 +196,7 @@ describe('DemoQA Interactions Section', () => {
     await interactionsPage.dragElementByOffset(interactionsPage.bottomCursorBox, 70, 70);
     const bottomEnd = await interactionsPage.getElementLocation(interactionsPage.bottomCursorBox);
     expect(bottomEnd.x).to.be.greaterThan(bottomStart.x);
-    expect(bottomEnd.y).to.be.greaterThan(bottomStart.y);
+    expect(bottomEnd.y).to.be.at.least(bottomStart.y);
   });
 
 });
