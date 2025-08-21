@@ -36,16 +36,14 @@ export const config: WebdriverIO.Config = {
       {
         outputDir: 'allure-results',
         disableWebdriverStepsReporting: true,
-        disableWebdriverScreenshotsReporting: false,
+        disableWebdriverScreenshotsReporting: true,
       },
     ],
     [
       'junit',
       {
         outputDir: './junit-report/',
-        outputFileFormat: function (options) {
-          return `junit-${options.cid}.xml`;
-        },
+        outputFileFormat: (options) => `junit-${options.cid}.xml`,
       },
     ],
     [
@@ -76,44 +74,55 @@ export const config: WebdriverIO.Config = {
 
   baseUrl: 'https://demoqa.com/',
 
-  afterTest: async function (
-    test,
-    context,
-    { error, result, duration, passed, retries }
-  ) {
+  /**
+   * Attachments to Allure after each test
+   */
+  afterTest: async function (test, context, { error, passed }) {
     try {
-      if (browser && typeof browser.getSession === 'function') {
-        const session = await browser.getSession();
+      if (!browser || !browser.sessionId) return;
 
-        if (!passed) {
+      // screenshot only on fail
+      if (!passed) {
+        try {
           const screenshot = await browser.takeScreenshot();
           addAttachment(
-            'Screenshot on Failure',
+            `Screenshot - ${test.title}`,
             Buffer.from(screenshot, 'base64'),
             'image/png'
           );
+        } catch {
+          // ignore screenshot errors (ECONNREFUSED etc.)
         }
+      }
 
+      // page source (always)
+      try {
         const pageSource = await browser.getPageSource();
         addAttachment('Page Source', pageSource, 'text/html');
+      } catch {}
 
-        try {
-          const logs = await browser.getLogs('browser');
+      // console logs (safe)
+      try {
+        const logs = await browser.getLogs('browser');
+        if (logs.length) {
           addAttachment(
             'Browser Console Logs',
             JSON.stringify(logs, null, 2),
             'application/json'
           );
-        } catch {
         }
+      } catch {}
 
+      // attach video if exists
+      try {
         const videoPath = path.join('./video', `${browser.sessionId}.mp4`);
         if (fs.existsSync(videoPath)) {
           const video = fs.readFileSync(videoPath);
           addAttachment('Test Execution Video', video, 'video/mp4');
         }
-      }
+      } catch {}
     } catch {
+      // swallow any unexpected errors here
     }
   },
 };
