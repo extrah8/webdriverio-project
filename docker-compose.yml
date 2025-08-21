@@ -1,0 +1,15 @@
+version: "3.8"
+
+services:
+  wdio:
+    build: .
+    container_name: wdio-tests
+    shm_size: "2gb"
+    volumes:
+      - ./:/app
+      - ./allure-results:/app/allure-results
+      - ./allure-report:/app/allure-report
+      - ./video:/app/video
+      - ./junit-report:/app/junit-report
+    environment:
+      - BASE_URL=https://demoqa.com

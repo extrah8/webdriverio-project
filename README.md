@@ -105,6 +105,8 @@ npm run clean:all
 
 ---
 
+
+
 ## ✅ Features Covered
 
 ### 🔹 UI Testing
@@ -132,6 +134,44 @@ Useful for debugging flaky tests or UI issues.
 
 ---
 
+## 🐳 Docker Usage
+
+This project provides a Docker image with Node.js + Chrome + Firefox + Allure CLI preinstalled.
+It allows you to run tests in a consistent environment locally or in CI/CD.
+
+Build image:
+```bash
+docker build -t wdio-tests .
+```
+
+Run Chromium tests:
+```bash
+docker run --rm -v ${PWD}:/app wdio-tests npm run test:chromium
+```
+
+Run Firefox tests:
+```bash
+docker run --rm -v ${PWD}:/app wdio-tests npm run test:firefox
+```
+
+Generate Allure report:
+```bash
+docker run --rm -v ${PWD}:/app wdio-tests npm run allure:generate
+```
+
+Open Allure report on http://localhost:8080
+:
+```bash
+docker run --rm -p 8080:8080 -v ${PWD}:/app wdio-tests \
+  sh -c "npx allure open -p 8080 allure-report"
+```
+
+Clean artifacts:
+```bash
+docker run --rm -v ${PWD}:/app wdio-tests npm run clean:all
+```
+---
+
 ## 📣 Author
 
 Built and maintained by **Maksym**  
@@ -144,3 +184,4 @@ GitHub: [`extrah8`](https://github.com/extrah8)
 - WDIO framework is fully typed with TypeScript.
 - Allure and JUnit reports allow integration with CI/CD pipelines.
 - Utility functions provide reusable data generation and formatting tools.
+
