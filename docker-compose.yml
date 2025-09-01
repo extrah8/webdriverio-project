@@ -5,11 +5,9 @@ services:
     build: .
     container_name: wdio-tests
     shm_size: "2gb"
-    volumes:
-      - ./:/app
-      - ./allure-results:/app/allure-results
-      - ./allure-report:/app/allure-report
-      - ./video:/app/video
-      - ./junit-report:/app/junit-report
     environment:
       - BASE_URL=https://demoqa.com
+    ports:
+      - "5050:5050"
+    volumes:
+      - ./allure-report:/allure-report

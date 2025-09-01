@@ -136,40 +136,31 @@ Useful for debugging flaky tests or UI issues.
 
 ## 🐳 Docker Usage
 
-This project provides a Docker image with Node.js + Chrome + Firefox + Allure CLI preinstalled.
+This project provides a Docker image with **Node.js + Google Chrome + (optional) Firefox + Java (for Allure CLI)** preinstalled.  
 It allows you to run tests in a consistent environment locally or in CI/CD.
 
-Build image:
-```bash
-docker build -t wdio-tests .
-```
+### Quick Start (recommended)
 
-Run Chromium tests:
+Build the image:
 ```bash
-docker run --rm -v ${PWD}:/app wdio-tests npm run test:chromium
+docker compose build
 ```
+Run tests and generate the Allure report:
+```bash
+docker compose up --abort-on-container-exit
+```
+Tests will run inside the container.
 
-Run Firefox tests:
-```bash
-docker run --rm -v ${PWD}:/app wdio-tests npm run test:firefox
-```
+The Allure report is always generated, even if tests fail.
 
-Generate Allure report:
-```bash
-docker run --rm -v ${PWD}:/app wdio-tests npm run allure:generate
-```
+The report is available on the host at:
 
-Open Allure report on http://localhost:8080
-:
 ```bash
-docker run --rm -p 8080:8080 -v ${PWD}:/app wdio-tests \
-  sh -c "npx allure open -p 8080 allure-report"
+./allure-report/index.html
 ```
+The container exit code equals the test exit code.
 
-Clean artifacts:
-```bash
-docker run --rm -v ${PWD}:/app wdio-tests npm run clean:all
-```
+By default, the container exposes the report server on http://localhost:5050.
 ---
 
 ## 📣 Author

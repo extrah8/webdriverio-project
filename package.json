@@ -15,8 +15,14 @@
     "test:chromium": "wdio wdio.conf/wdio.chromium.conf.ts",
     "test:chromium:hedless": "wdio wdio.conf/wdio.chromium-hedless.conf.ts",
 
-    "allure:generate": "rimraf allure-report && npx allure generate allure-results -o allure-report",
-    "allure:open": "npx allure open allure-report",
+    "test": "wdio wdio.conf/wdio.chromium-hedless.conf.ts",
+
+    "allure:generate": "npx allure generate allure-results -o allure-report --clean",
+    "allure:open": "npx allure open --host 0.0.0.0 --port 5050 allure-report",
+
+    "test:report:serve": "sh -lc 'npm run test; code=$?; npm run allure:generate || true; npm run allure:open; exit $code'",
+    "test:report:ci": "sh -lc 'npm run test; code=$?; npm run allure:generate || true; exit $code'",
+
     "clean:all": "rimraf allure-results allure-report .allure video junit-report"
   },
   "keywords": [],
