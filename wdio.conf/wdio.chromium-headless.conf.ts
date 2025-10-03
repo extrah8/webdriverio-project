@@ -38,7 +38,11 @@ export const config: WebdriverIO.Config = {
     ...(baseConfig.mochaOpts || {}),
     ui: 'bdd',
     timeout: isCI ? 180_000 : 90_000,
+    retries: isCI ? 1 : 0
   },
+
+  specFileRetries: isCI ? 1 : 0,
+  specFileRetriesDeferred: true,
 
   maxInstances: forcedInstances ?? (isCI ? 1 : 3),
 
@@ -107,6 +111,15 @@ export const config: WebdriverIO.Config = {
 
   afterNavigateTo: async function () {
     try { await browser.execute(ADS_KILLER); } catch {}
+  },
+
+  beforeCommand: async function (commandName: string) {
+    if (!isCI) return;
+    try {
+      if (commandName === 'click' || commandName === 'elementClick') {
+        await browser.execute(ADS_KILLER);
+      }
+    } catch {}
   },
 
   afterTest: async function (_test, _ctx, { error }) {
