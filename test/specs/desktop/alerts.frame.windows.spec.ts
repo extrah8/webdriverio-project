@@ -2,6 +2,19 @@ import { expect } from 'chai';
 import { homePage, CardName, AlertsFrameWindowsMenuItem } from '../../../pageobjects/home.page';
 import { alertsFrameWindowsPage } from '../../../pageobjects/alerts.frame.windows.page';
 
+async function killAds() {
+  await browser.execute(() => {
+    const selectors = [
+      'iframe[id^="google_ads_iframe"]',
+      'iframe[src*="googlesyndication"]',
+      'iframe[src*="doubleclick"]',
+      '.adsbygoogle',
+      '[aria-label="Advertisement"]'
+    ];
+    document.querySelectorAll(selectors.join(',')).forEach(el => el.remove());
+  });
+}
+
 describe('DemoQA Alerts, Frame & Windows Section', () => {
 
   it('Browser Windows - should handle tab and window navigation', async () => {
@@ -10,6 +23,7 @@ describe('DemoQA Alerts, Frame & Windows Section', () => {
     await homePage.selectAlertsMenuItem(AlertsFrameWindowsMenuItem.browserWindows);
 
     await alertsFrameWindowsPage.openNewTabAndValidate('This is a sample page');
+    await killAds();
     await alertsFrameWindowsPage.openNewWindowAndValidate('This is a sample page');
     await alertsFrameWindowsPage.openNewWindowMessageAndValidate();
   });
