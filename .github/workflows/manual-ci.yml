@@ -32,6 +32,10 @@ jobs:
         with:
           install-chromedriver: true
           install-dependencies: true
+          
+      - name: Prepare report dirs
+        run: |
+          mkdir -p video allure-results junit-report
 
       - name: Run Chromium tests (headless)
         env:
