@@ -8,6 +8,8 @@ permissions:
 
 env:
   NODE_VERSION: '20'
+  CI: true
+  WDIO_MAX_INSTANCES: 1
 
 jobs:
   ui-tests:
@@ -32,17 +34,13 @@ jobs:
         with:
           install-chromedriver: true
           install-dependencies: true
-          
+
       - name: Prepare report dirs
         run: |
           mkdir -p video allure-results junit-report
 
       - name: Run Chromium tests (headless)
-        env:
-          CI: true
-          WDIO_MAX_INSTANCES: 1
-        run: |
-          npm run test:chromium:headless
+        run: npm run test:chromium:headless
 
       - name: Upload JUnit XML
         if: always()
