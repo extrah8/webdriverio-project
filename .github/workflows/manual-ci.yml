@@ -1,0 +1,64 @@
+name: Manual CI - WebdriverIO (Chromium)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: '20'
+
+jobs:
+  ui-tests:
+    name: UI tests (Chromium headless)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install deps
+        run: npm ci
+
+      - name: Setup Chrome
+        uses: browser-actions/setup-chrome@v2
+        with:
+          install-chromedriver: true
+          install-dependencies: true
+
+      - name: Run Chromium tests (headless)
+        env:
+          CI: true
+        run: |
+          npm run test:chromium:headless
+
+      - name: Upload JUnit XML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: junit-report/**/*.xml
+          if-no-files-found: ignore
+
+      - name: Upload Allure results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: allure-results
+          path: allure-results/**
+          if-no-files-found: ignore
+
+      - name: Upload Videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: video
+          path: video/**/*.mp4
+          if-no-files-found: ignore
