@@ -13,7 +13,7 @@
     "test:api": "wdio wdio.conf/wdio.api.conf.ts",
     "test:firefox": "wdio wdio.conf/wdio.firefox.conf.ts",
     "test:chromium": "wdio wdio.conf/wdio.chromium.conf.ts",
-    "test:chromium:hedless": "wdio wdio.conf/wdio.chromium-hedless.conf.ts",
+    "test:chromium:headless": "wdio wdio.conf/wdio.chromium-headless.conf.ts",
 
     "test": "wdio wdio.conf/wdio.chromium-hedless.conf.ts",
 
